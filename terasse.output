@@ -1,0 +1,47 @@
+/Users/rwanou/.nvm/versions/node/v10.16.0/bin/node /Users/rwanou/DEV/projects/blecast/index.js
+Debugger listening on ws://127.0.0.1:61748/d67af2be-e12f-42e3-9247-4a1232df8565
+For help, see: https://nodejs.org/en/docs/inspector
+Debugger attached.
+state changed!! poweredOn
+poweredOn scanning...
+Found peripheral: terasse
+33011b640e101770006c03e826f13500
+{ version: 27,
+  battery: 100,
+  timeInterval: 3600,
+  timeIntervalPosition: 6000,
+  temperature: 10.8,
+  humidity: 100,
+  dewPoint: 996.9 }
+Found peripheral: terasse
+33011b640e101770006c03e826f03500
+{ version: 27,
+  battery: 100,
+  timeInterval: 3600,
+  timeIntervalPosition: 6000,
+  temperature: 10.8,
+  humidity: 100,
+  dewPoint: 996.8 }
+Found peripheral: terasse
+330126f626dd26bc0000006c03e8004d038e005803b9006bf2c53e
+{ highestTemperature: 997.4,
+  highestHumidity: 994.9,
+  lowestTemperature: 991.6,
+  lowestHumidity: 0,
+  highest24Temperature: 10.8,
+  highest24Humidity: 100,
+  lowest24Temperature: 7.7,
+  lowest24Humidity: 91,
+  average24Temperature: 8.8,
+  average24humidity: 95.3,
+  data1: 10.7,
+  data2: -338.7 }
+Found peripheral: terasse
+33011b640e101770006b03e826f13500
+{ version: 27,
+  battery: 100,
+  timeInterval: 3600,
+  timeIntervalPosition: 6000,
+  temperature: 10.7,
+  humidity: 100,
+  dewPoint: 996.9 }
