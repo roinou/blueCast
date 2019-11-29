@@ -53,10 +53,14 @@ function publish(data) {
   console.log("publishing data");
   client.publish('sensor', JSON.stringify(data),
     function(err) {if (err) console.log(err);});
-  if (data.data.temperature)
-    client.publish('sensor/' + data.name + '/temperature', "" + data.data.temperature);
-  if (data.data.battery)
-    client.publish('sensor/' + data.name + '/battery', "" + data.data.battery);
+  publishMetric(data, ['battery', 'humidity', 'temperature']);
+}
+
+function publishMetric(data, metrics) {
+  metrics.forEach(metric => {
+    if (data.data && data.data[metric])
+      client.publish('sensor/' + data.name + '/' + metric, "" + data.data[metric]);
+  });
 }
 
 /**
