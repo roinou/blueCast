@@ -2,42 +2,49 @@ const noble = require('@abandonware/noble');
 const debug = require('debug')('debug');
 const info = require('debug')('info');
 
-const scanningTimeout = 15000;
-const scanningRepeat = scanningTimeout + 5000; // Repeat scanning after 10 seconds for new peripherals.
+const TOPIC = 'sensor';
+const CTL_TOPIC = TOPIC + '/ctl';
+
+const DEFAULT_SCAN_TIME = 5000;
 
 const mqtt = require('mqtt');
 const client = mqtt.connect('mqtt://centralpi');
 
-noble.on('stateChange', function(state) {
-  info('state changed: ' + state);
-  if (state === 'poweredOn') {
-    //
-    // Once the BLE radio has been powered on, it is possible
-    // to begin scanning for services. Pass an empty array to
-    // scan for all services (uses more time and power).
-    //
-    info('start scanning');
-    noble.startScanning([], true);
-  } else {
-    info('stop scanning');
-    noble.stopScanning();
+client.on('connect', () => {
+  client.subscribe(CTL_TOPIC, function (err, granted) {
+    if (err == null)
+      info('control topic subscribed:', granted);
+    else
+      info('could not subscribe to control topic:', err);
+  });
+});
+
+client.on('message', (topic, msg) => {
+  if (topic === CTL_TOPIC) {
+    debug('received control message:', msg);
+    let timeout = parseInt(msg, 10);
+    if (msg) {
+    }
+    if (isNaN(timeout)) {
+      timeout = DEFAULT_SCAN_TIME;
+    }
+    if (noble.state === 'poweredOn') {
+      debug('start scanning');
+      noble.startScanning([], true);
+      setTimeout(function () {
+        debug('stopping scan');
+        noble.stopScanning();
+      }, timeout);
+    }
   }
 });
 
-// Checking, Scanning, stopping repeatedly
-/*setInterval( function(){
-  if(noble.state==='poweredOn'){
-    noble.startScanning();
-    console.log('Starting Scan...');
-    setTimeout(function(){
-    noble.stopScanning();
-    console.log('Stopping Scan...');
-    }, scanningTimeout)
-  }
-}, scanningRepeat);*/
+// needed to force Noble to init state
+noble.on('stateChange', function(state) {
+  info('state changed: ' + state);
+});
 
 noble.on('discover', function(peripheral) {
-
   const advertisement = peripheral.advertisement;
   const manufacturerData = advertisement.manufacturerData;
   if (isDeviceCompatible(advertisement)) {
@@ -51,10 +58,9 @@ noble.on('discover', function(peripheral) {
   }
 }); // End on Noble Discover!
 
-
 function publish(data) {
   debug("publishing data");
-  client.publish('sensor', JSON.stringify(data),
+  client.publish(TOPIC, JSON.stringify(data),
     function(err) {if (err) info(err);});
   publishMetric(data, ['battery', 'humidity', 'temperature']);
 }
@@ -62,7 +68,7 @@ function publish(data) {
 function publishMetric(data, metrics) {
   metrics.forEach(metric => {
     if (data.data && data.data[metric])
-      client.publish('sensor/' + data.name + '/' + metric, "" + data.data[metric]);
+      client.publish(TOPIC + '/' + data.name + '/' + metric, "" + data.data[metric]);
   });
 }
 
