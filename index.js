@@ -1,4 +1,4 @@
-const noble = require('noble-mac');
+const noble = require('@abandonware/noble');
 const scanningTimeout = 15000;
 const scanningRepeat = scanningTimeout + 5000; // Repeat scanning after 10 seconds for new peripherals.
 
@@ -8,15 +8,15 @@ const client = mqtt.connect('mqtt://centralpi');
 noble.on('stateChange', function(state) {
   console.log('state changed!! ' + state);
   if (state === 'poweredOn') {
-  //
-  // Once the BLE radio has been powered on, it is possible
-  // to begin scanning for services. Pass an empty array to
-  // scan for all services (uses more time and power).
-  //
+    //
+    // Once the BLE radio has been powered on, it is possible
+    // to begin scanning for services. Pass an empty array to
+    // scan for all services (uses more time and power).
+    //
     console.log('poweredOn scanning...');
     noble.startScanning([], true);
-  } else { 
-    console.log('poweredOn stop scanning'); 
+  } else {
+    console.log('poweredOn stop scanning');
     noble.stopScanning();
   }
 });
@@ -38,11 +38,12 @@ noble.on('discover', function(peripheral) {
   const advertisement = peripheral.advertisement;
   const manufacturerData = advertisement.manufacturerData;
   if (isDeviceCompatible(advertisement)) {
-    //console.log('Found peripheral:', advertisement.localName);
-    //console.log(manufacturerData.toString('hex'));
+    console.log('Found peripheral:', advertisement.localName, peripheral.uuid);
+    console.log(manufacturerData.toString('hex'));
     const desc = fetchDeviceDescription(peripheral);
     if (desc) {
       const data = decodeTempo(manufacturerData, desc);
+      console.log("publishing data");
       client.publish('sensor', JSON.stringify(data),
         function(err) {if (err) console.log(err);});
     }
@@ -55,7 +56,6 @@ noble.on('discover', function(peripheral) {
  */
 function isDeviceCompatible(advertisement) {
   if (advertisement && advertisement.manufacturerData && advertisement.manufacturerData.length > 2) {
-    // console.log(advertisement.manufacturerData.hexSlice(0, 2));
     // fixme magic ID
     return advertisement.manufacturerData.slice(0, 2).toString('hex') === "3301";
   }
