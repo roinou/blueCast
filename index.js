@@ -43,12 +43,21 @@ noble.on('discover', function(peripheral) {
     const desc = fetchDeviceDescription(peripheral);
     if (desc) {
       const data = decodeTempo(manufacturerData, desc);
-      console.log("publishing data");
-      client.publish('sensor', JSON.stringify(data),
-        function(err) {if (err) console.log(err);});
+      publish(data);
     }
   }
 }); // End on Noble Discover!
+
+
+function publish(data) {
+  console.log("publishing data");
+  client.publish('sensor', JSON.stringify(data),
+    function(err) {if (err) console.log(err);});
+  if (data.data.temperature)
+    client.publish('sensor/' + data.name + '/temperature', "" + data.data.temperature);
+  if (data.data.battery)
+    client.publish('sensor/' + data.name + '/battery', "" + data.data.battery);
+}
 
 /**
  * checks if device starts with 33 01 i.e. it's a blue maestro device
