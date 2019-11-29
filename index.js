@@ -1,4 +1,7 @@
 const noble = require('@abandonware/noble');
+const debug = require('debug')('debug');
+const info = require('debug')('info');
+
 const scanningTimeout = 15000;
 const scanningRepeat = scanningTimeout + 5000; // Repeat scanning after 10 seconds for new peripherals.
 
@@ -6,17 +9,17 @@ const mqtt = require('mqtt');
 const client = mqtt.connect('mqtt://centralpi');
 
 noble.on('stateChange', function(state) {
-  console.log('state changed!! ' + state);
+  info('state changed: ' + state);
   if (state === 'poweredOn') {
     //
     // Once the BLE radio has been powered on, it is possible
     // to begin scanning for services. Pass an empty array to
     // scan for all services (uses more time and power).
     //
-    console.log('poweredOn scanning...');
+    info('start scanning');
     noble.startScanning([], true);
   } else {
-    console.log('poweredOn stop scanning');
+    info('stop scanning');
     noble.stopScanning();
   }
 });
@@ -38,8 +41,8 @@ noble.on('discover', function(peripheral) {
   const advertisement = peripheral.advertisement;
   const manufacturerData = advertisement.manufacturerData;
   if (isDeviceCompatible(advertisement)) {
-    console.log('Found peripheral:', advertisement.localName, peripheral.uuid);
-    console.log(manufacturerData.toString('hex'));
+    debug('Found peripheral:', advertisement.localName, peripheral.uuid);
+    debug(manufacturerData.toString('hex'));
     const desc = fetchDeviceDescription(peripheral);
     if (desc) {
       const data = decodeTempo(manufacturerData, desc);
@@ -50,9 +53,9 @@ noble.on('discover', function(peripheral) {
 
 
 function publish(data) {
-  console.log("publishing data");
+  debug("publishing data");
   client.publish('sensor', JSON.stringify(data),
-    function(err) {if (err) console.log(err);});
+    function(err) {if (err) info(err);});
   publishMetric(data, ['battery', 'humidity', 'temperature']);
 }
 
@@ -89,17 +92,18 @@ function fetchDeviceDescription(peripheral) {
 function describeDevice(peripheral) {
   const adv = peripheral.advertisement;
   if (adv.manufacturerData.length <= 16) {
-    return {
-      version: adv.manufacturerData.readUInt8(2),
-      label: adv.localName
+    const desc = {
+      label: adv.localName,
+      version: adv.manufacturerData.readUInt8(2)
     };
+    info('found and registered:', desc);
+    return desc;
   }
   return undefined;
 }
 
 function decodeTempo(buf, description) {
   const data = {};
-  //console.log('buffer length:', buf.length);
   if (buf.length <= 16) {
     decodeShortBeacon(buf, description, data);
   } else {
