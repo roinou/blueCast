@@ -105,7 +105,6 @@ User=bluecast
 EnvironmentFile=/etc/default/bluecast
 WorkingDirectory=/home/pi/project/bluecast
 ExecStart=/usr/bin/node index.js
-#ExecStart=pwd
 Restart=on-failure
 RestartSec=3
 KillMode=process
@@ -114,7 +113,7 @@ KillMode=process
 WantedBy=multi-user.target
 ```
 
-And enable the service: `sudo systemctl daemon-reload; sudo system enable bluecast; sudo systemctl start bluecast`
+And enable the service: `sudo systemctl daemon-reload; sudo systemctl enable bluecast; sudo systemctl start bluecast`
 
 And check the logs: `sudo journalctl -f -n 200 -u bluecast`
 
