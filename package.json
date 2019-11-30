@@ -1,12 +1,12 @@
 {
-  "name": "blecast",
+  "name": "bluecast",
   "version": "1.0.0",
-  "description": "",
+  "description": "Brings Blue Maestro sensors to MQTT",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
+  "author": "roinou",
   "license": "ISC",
   "dependencies": {
     "@abandonware/noble": "^1.9.2-5",
