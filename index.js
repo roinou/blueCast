@@ -2,10 +2,10 @@ const noble = require('@abandonware/noble');
 const debug = require('debug')('debug');
 const info = require('debug')('info');
 
-const TOPIC = 'sensor';
+const TOPIC = process.env.TOPIC_NAME ? process.env.TOPIC_NAME : 'sensor';
 const CTL_TOPIC = TOPIC + '/ctl';
 
-const DEFAULT_SCAN_TIME = 5000;
+const DEFAULT_SCAN_TIME = process.env.SCAN_TIME ? process.env.SCAN_TIME : 5000;
 
 const mqtt = require('mqtt');
 const client = mqtt.connect('mqtt://centralpi');
@@ -22,19 +22,13 @@ client.on('connect', () => {
 client.on('message', (topic, msg) => {
   if (topic === CTL_TOPIC) {
     debug('received control message:', msg);
-    let timeout = parseInt(msg, 10);
-    if (msg) {
-    }
-    if (isNaN(timeout)) {
-      timeout = DEFAULT_SCAN_TIME;
-    }
     if (noble.state === 'poweredOn') {
       debug('start scanning');
       noble.startScanning([], true);
       setTimeout(function () {
         debug('stopping scan');
         noble.stopScanning();
-      }, timeout);
+      }, DEFAULT_SCAN_TIME);
     }
   }
 });
