@@ -72,6 +72,7 @@ But individual readings will be put in specific topics:
 
 The following environment properties configure BlueCast:
 
+- **MQTT_HOST**: the mqtt hostname
 - **TOPIC_NAME**: the base name for the MQTT topic
 - **SCAN_TIME**: the amount in time, in milliseconds, to run discovery when message received on topic
 - **DEBUG** `info|debug`: log level (comma separated)
@@ -87,6 +88,7 @@ NOBLE_REPORT_ALL_HCI_EVENTS=1
 DEBUG=info
 
 ## Default values
+#MQTT_HOST=localhost
 #TOPIC_NAME=sensor
 #SCAN_TIME=5000
 ```

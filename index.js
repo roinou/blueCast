@@ -2,13 +2,14 @@ const noble = require('@abandonware/noble');
 const debug = require('debug')('debug');
 const info = require('debug')('info');
 
+const MQTT_HOST = process.env.MQTT_HOST ? process.env.MQTT_HOST : 'localhost';
 const TOPIC = process.env.TOPIC_NAME ? process.env.TOPIC_NAME : 'sensor';
 const CTL_TOPIC = TOPIC + '/ctl';
 
 const DEFAULT_SCAN_TIME = process.env.SCAN_TIME ? process.env.SCAN_TIME : 5000;
 
 const mqtt = require('mqtt');
-const client = mqtt.connect('mqtt://centralpi');
+const client = mqtt.connect('mqtt://' + MQTT_HOST);
 
 client.on('connect', () => {
   client.subscribe(CTL_TOPIC, function (err, granted) {
