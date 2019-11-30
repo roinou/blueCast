@@ -19,15 +19,19 @@ client.on('connect', () => {
   });
 });
 
+let isScanning = false;
+
 client.on('message', (topic, msg) => {
   if (topic === CTL_TOPIC) {
     debug('received control message:', msg);
-    if (noble.state === 'poweredOn') {
+    if (noble.state === 'poweredOn' && !isScanning) {
       debug('start scanning');
       noble.startScanning([], true);
+      isScanning = true;
       setTimeout(function () {
         debug('stopping scan');
         noble.stopScanning();
+        isScanning = false;
       }, DEFAULT_SCAN_TIME);
     }
   }
