@@ -133,7 +133,7 @@ function decodeShortBeacon(buf, description, data) {
   data.breachCount = buf.readUInt8(15);
   if (description.version === 23) {
     data.dewPoint = buf.readInt16BE(12) / 10;
-  } else if (description.version === 37) {
+  } else if (description.version === 27) {
     data.pressure = buf.readInt16BE(12) / 10;
   }
 }
