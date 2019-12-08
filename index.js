@@ -11,6 +11,18 @@ const DEFAULT_SCAN_TIME = process.env.SCAN_TIME ? process.env.SCAN_TIME : 5000;
 const mqtt = require('mqtt');
 const client = mqtt.connect('mqtt://' + MQTT_HOST);
 
+// mappings per manufacturer, then per version
+const DEVICE_MAPPINGS = {
+  '3301': {
+    '23': {
+      metrics: ['battery', 'humidity', 'temperature']
+    },
+    '27': {
+      metrics: ['battery', 'humidity', 'temperature', 'pressure']
+    }
+  }
+};
+
 client.on('connect', () => {
   client.subscribe(CTL_TOPIC, function (err, granted) {
     if (err == null)
@@ -46,22 +58,25 @@ noble.on('stateChange', function(state) {
 noble.on('discover', function(peripheral) {
   const advertisement = peripheral.advertisement;
   const manufacturerData = advertisement.manufacturerData;
-  if (isDeviceCompatible(advertisement)) {
+  const mapping = DEVICE_MAPPINGS[extractManufacturerData(advertisement)];
+  if (mapping !== undefined) {
     debug('Found peripheral:', advertisement.localName, peripheral.uuid);
     debug(manufacturerData.toString('hex'));
     const desc = fetchDeviceDescription(peripheral);
     if (desc) {
       const data = decodeTempo(manufacturerData, desc);
-      publish(data);
+      publish(data, mapping[data.version]);
     }
   }
 }); // End on Noble Discover!
 
-function publish(data) {
+function publish(data, mappings) {
   debug("publishing data");
   client.publish(TOPIC, JSON.stringify(data),
     function(err) {if (err) info(err);});
-  publishMetric(data, ['battery', 'humidity', 'temperature']);
+  if (mappings && mappings.metrics) {
+    publishMetric(data, mappings.metrics);
+  }
 }
 
 function publishMetric(data, metrics) {
@@ -75,12 +90,12 @@ function publishMetric(data, metrics) {
  * checks if device starts with 33 01 i.e. it's a blue maestro device
  * @param advertisement
  */
-function isDeviceCompatible(advertisement) {
+function extractManufacturerData(advertisement) {
   if (advertisement && advertisement.manufacturerData && advertisement.manufacturerData.length > 2) {
     // fixme magic ID
-    return advertisement.manufacturerData.slice(0, 2).toString('hex') === "3301";
+    return advertisement.manufacturerData.slice(0, 2).toString('hex');
   }
-  return false;
+  return "";
 }
 
 // keeps track of discovered devices
