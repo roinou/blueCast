@@ -119,6 +119,8 @@ And enable the service: `sudo systemctl daemon-reload; sudo systemctl enable blu
 
 And check the logs: `sudo journalctl -f -n 200 -u bluecast`
 
+make sure to check Noble's project for complete instalation procedure, e.g. `sudo setcap cap_net_raw+eip $(eval readlink -f `which node`)`
+
 
 ### Application
 
